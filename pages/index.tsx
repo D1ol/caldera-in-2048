@@ -3,6 +3,7 @@ import Board from "@/components/board";
 import Score from "@/components/score";
 import Timer from "@/components/timer";
 import SaveForm from "@/components/saveForm";
+import DropdownMenu from "@/components/dropdown";
 import styles from "@/styles/index.module.css";
 import { useRouter } from "next/router";
 import Image from "next/image";
@@ -48,6 +49,9 @@ export default function Home() {
       </main>
       <div>
         <Timer />
+      </div>
+      <div>
+        <DropdownMenu />
       </div>
       <div>
         <SaveForm />
