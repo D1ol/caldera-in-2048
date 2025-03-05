@@ -1,43 +1,63 @@
-import React, { useContext, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useState,
+  useRef,
+  useReducer, useEffect
+} from "react";
 import styles from "@/styles/saveForm.module.css";
 import { GameContext } from "@/context/game-context";
 import bcrypt from "bcryptjs";
 
 interface NameInputProps {
-
 }
 
-const NameInput: React.FC<NameInputProps> = () => {
+const SaveForm: React.FC<NameInputProps> = (props) => {
   const { score, status, time } = useContext(GameContext);
+
   const [name, setName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
-  const apiSalt = Number(process.env.NEXT_PUBLIC_API_SALT);
-  const jsonString = JSON.stringify({name,score, status, time, apiSalt});
-  const generatedSalt =bcrypt.hashSync(jsonString, apiSalt);
+  const scoreRef = useRef(score);
+  const statusRef = useRef(status);
+  const timeRef = useRef(time);
+
+  useEffect(() => {
+    scoreRef.current = score;
+    statusRef.current = status;
+    timeRef.current = time;
+  }, [score, status, time]);
+
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
 
+  const handleSubmit = useCallback(async () => {
+    const apiSalt = Number(process.env.NEXT_PUBLIC_API_SALT);
+    const jsonString = JSON.stringify({
+      name,
+      score: scoreRef.current,
+      status: statusRef.current,
+      time: timeRef.current,
+      apiSalt,
+    });
+    const generatedSalt = bcrypt.hashSync(jsonString, apiSalt);
 
-  const handleSubmit = async () => {
+
+    if (loading) return;
 
     if (!name.trim()) {
       setError("Provide your name pls");
       return;
     }
 
-    if (score < 2) {
+    if (scoreRef.current < 2) {
       setError("Try to play better");
       return;
     }
 
-    if (!name.trim()) {
-      setError("Name is required!");
-      return;
-    }
     setLoading(true);
     setError("");
 
@@ -47,7 +67,7 @@ const NameInput: React.FC<NameInputProps> = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({name,score, status, time, generatedSalt}),
+        body: JSON.stringify({ name, score: scoreRef.current, status: statusRef.current, time: timeRef.current, generatedSalt }),
       });
 
       if (response.ok) {
@@ -61,7 +81,7 @@ const NameInput: React.FC<NameInputProps> = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, name]);
 
   return (
     <div>
@@ -74,12 +94,18 @@ const NameInput: React.FC<NameInputProps> = () => {
         className={styles.inputName}
         required={true}
       />
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <button onClick={handleSubmit} className={styles.button} disabled={loading}>
-        {loading ? "Saving..." : "Save Score"}
+      <button
+        onClick={handleSubmit}
+        className={styles.button}
+        disabled={loading}
+      >
+        {loading
+          ? "Saving...":
+           "Save score"}
       </button>
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };
 
-export default NameInput;
+export default SaveForm;
