@@ -19,6 +19,7 @@ interface DbData {
   win: false,
   status: string,
   keyHash: string,
+  cheater: false
 }
 
 const leaderboardHandler =  async (req: NextApiRequest, res: NextApiResponse) => {
@@ -51,7 +52,7 @@ const leaderboardHandler =  async (req: NextApiRequest, res: NextApiResponse) =>
 
 
 function prepareWinData(mappedData: DbData[]) {
-  const filteredData = mappedData.filter((game: DbData) => (game.win));
+  const filteredData = mappedData.filter((game: DbData) => (game.win && !game.cheater));
 
   const bestGames: { [key: string]: DbData } = {};
 
@@ -69,7 +70,9 @@ function prepareWinData(mappedData: DbData[]) {
 function prepareScoreData(mappedData:DbData[]) {
   const bestScores: { [key: string]: DbData } = {};
 
-  for (const game of mappedData) {
+  const filteredData = mappedData.filter((game: DbData) => (!game.cheater));
+
+  for (const game of filteredData) {
     const { name, score} = game;
 
     if (!bestScores[name] || score > bestScores[name].score) {

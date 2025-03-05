@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import styles from "@/styles/saveForm.module.css";
 import { GameContext } from "@/context/game-context";
+import bcrypt from "bcryptjs";
 
 interface NameInputProps {
 
@@ -11,6 +12,10 @@ const NameInput: React.FC<NameInputProps> = () => {
   const [name, setName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+
+  const apiSalt = Number(process.env.NEXT_PUBLIC_API_SALT);
+  const jsonString = JSON.stringify({name,score, status, time, apiSalt});
+  const generatedSalt =bcrypt.hashSync(jsonString, apiSalt);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -42,7 +47,7 @@ const NameInput: React.FC<NameInputProps> = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({name,score, status, time}),
+        body: JSON.stringify({name,score, status, time, generatedSalt}),
       });
 
       if (response.ok) {
