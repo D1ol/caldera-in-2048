@@ -22,7 +22,7 @@ const DropdownMenu = () => {
           <p>Use arrow keys or swipe to move tiles.</p>
           <p>When two tiles with the same number touch, they merge!</p>
           <p>Goal: Reach the final 2048 tile to WIN!</p>
-          <p>Don't forget: Save your result!</p>
+          <p>Don&apos;t forget: Save your result!</p>
 
           <h3 className={styles.heading}>Tile Values:</h3>
           <div className={styles.tileGrid}>
